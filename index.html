@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>H O R O S C O P E</title>
+<meta charset="UTF-8">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>   
+<h1>H O R O S C O P E</h1>
+<div class="form">      
+Förnamn :<input style='margin-left:50px;margin-bottom:5px;margin-top:5px;' type='text' name='namn' ><br/>
+Efternamn :<input style='margin-left:40px;margin-bottom:5px;' type='text'  name='efternamn' ><br/>
+Personnummer : <input class="personnummer" style='margin-left:7px;' type='text' placeholder='19890416-6793'><br/>
+<input class="submit" style='margin-top:8px;padding:10px;border-radius:20px;' type='button' value='submit'>
+<input class="update" style='margin-top:8px;padding:10px;border-radius:20px;display:none;' type='button' value='uppdate'>
+<input class="delete" style='margin-top:8px;padding:10px;border-radius:20px;display:none;' type='button' value='delete'> 
+</div>
+<div class="result"></div>
+
+
+
+<script>
+    
+  $(document).ready(function(){
+    function viewResult(){
+        $.ajax({url:"viewHoroscope.php", xhrFields: {withCredentials: true}})
+        .done (function (data){
+        if(!data){
+        $(".submit").css({'display':'inline'});    
+        $(".update").css({'display':'none'}); 
+        $(".delete").css({'display':'none'});
+        $(".result").empty();
+        $(".result").css({'margin-left':100}); 
+        $(".result").append('<svg width="300" height="200"><polygon points="100,10 40,198 190,78 10,78 160,198" style="fill:#ffffff;stroke:#000a30;stroke-width:5;fill-rule:evenodd;" /></svg>');
+        }else{ 
+        $(".submit").css({'display':'none'});
+        $(".update").css({'display':'inline'}); 
+        $(".delete").css({'display':'inline'});        
+        $(".result").empty();
+        $(".result").css({'margin-left':0}); 
+        $(".result").append('<img  src="'+data+'" >');
+        }
+        })
+        .fail (function(){
+        alert("somthing is wrong , please come back after afew minutes");
+        });     
+    } 
+    viewResult(); 
+    $(".submit").click(function(){
+        var path = new RegExp('^[1]{1}[1-9]{3}[0-1]{1}[0-9]{1}[0-3]{1}[0-9]{1}-[0-9]{4}$'); 
+         var personno = $(".personnummer").val(); 
+         if (path.test(personno)) {
+            $.post("addHoroscope.php",
+                {
+                  personnummer:$(".personnummer").val() 
+                },
+                function(data){
+                viewResult();
+            });  
+        }else{
+            alert("Please check your person number");
+            $( ".personnummer" ).focus();
+        }    
+          
+    });
+    
+    $(".delete").click(function(){
+    $.ajax({
+    url: "deleteHoroscope.php",
+    type: "Delete",
+    success: deletefn
+    }); 
+    function deletefn(result){
+        if(result == 1){
+        $(".personnummer").val(" ");
+        viewResult(); 
+        }else{
+        location.reload();  
+        }       
+    }   
+    });
+    $(".update").click(function(){
+        var path = new RegExp('^[1]{1}[1-9]{3}[0-1]{1}[0-9]{1}[0-3]{1}[0-9]{1}-[0-9]{4}$'); 
+        var personno = $(".personnummer").val(); 
+        if (path.test(personno)){      
+        $.ajax({
+            url:"updateHoroscope.php",
+            type: "PUT",
+            data: {personnummer: $(".personnummer").val()},
+            xhrFields: {withCredentials: true}})
+            .done (function(data){
+             if(data == 1){  
+                 viewResult();
+            }else{
+                location.reload();
+            }
+            });
+        }else{
+            alert("Please check your person number");
+            $( ".personnummer" ).focus();
+        }
+    });
+        
+  
+    
+    
+    
+    
+    
+
+   
+    
+    
+      
+   
+
+
+});
+</script>
+</body>
+</html>
